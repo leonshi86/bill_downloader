@@ -1,0 +1,17 @@
+{
+    "email": "shilei8636@126.com",
+    "auth_code": "ZV6REiB9QVUA74jW",
+    "save_dir": "E:/账单/test",
+    "senders": [
+        "广发"
+    ],
+    "subject_keywords": [
+        "账单",
+        "对账单"
+    ],
+    "check_days": 90,
+    "allow_exts": [
+        ".pdf"
+    ],
+    "minimize_to_tray": true
+}

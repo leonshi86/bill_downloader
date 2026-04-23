@@ -543,7 +543,7 @@ class MainWindow(QMainWindow):
         self.status_lab.setText("下载中...")
         self.pro_bar.setVisible(True)
 
-        kws = [k.strip() for k in re.split(r'[,\s,]+', self.kw_edit.text()) if k.strip()]
+        kws = self._parse_keywords(self.kw_edit.text())
         exts = [e.strip() for e in self.ext_edit.text().split() if e.startswith(".")] or [".pdf"]
 
         self._thread = DownloadThread(
@@ -590,26 +590,40 @@ class MainWindow(QMainWindow):
         self.status_lab.setText("就绪")
         QTimer.singleShot(1500, lambda: self.pro_bar.setVisible(False))
 
-    def _save_config(self):
+    @staticmethod
+    def _parse_keywords(text: str) -> list:
+        """解析关键词：空格/英文逗号/中文逗号均为分隔符，去重去空"""
+        seen = set()
+        result = []
+        for w in re.split(r'[，,\s]+', text):
+            w = w.strip()
+            if w and w not in seen:
+                seen.add(w)
+                result.append(w)
+        return result
+
+    def _save_config(self, silent=False):
         cfg = {
             "email": self.email_edit.text().strip(),
             "auth_code": self.auth_edit.text().strip(),
             "save_dir": self.dir_edit.text().strip(),
-            "sender": self.sender_edit.text().strip(),
-            "subject_keywords": [k.strip() for k in re.split(r'[,\s，]+', self.kw_edit.text()) if k.strip()],
+            "senders": self._parse_keywords(self.sender_edit.text()),
+            "subject_keywords": self._parse_keywords(self.kw_edit.text()),
             "check_days": self.days_spin.value(),
-            "allow_exts": self.ext_edit.text().strip(),
+            "allow_exts": [e.strip() for e in self.ext_edit.text().split() if e.startswith(".")] or [".pdf"],
             "minimize_to_tray": self.tray_check.isChecked()
         }
         save_config(cfg)
-        QMessageBox.information(self,"成功","配置已保存")
+        if not silent:
+            QMessageBox.information(self,"成功","配置已保存")
 
     def _load_config(self):
         c = self.cfg
         self.email_edit.setText(c.get("email",""))
         self.auth_edit.setText(c.get("auth_code",""))
         self.dir_edit.setText(c.get("save_dir",""))
-        self.sender_edit.setText(c.get("sender",""))
+        senders = c.get("senders", [])
+        self.sender_edit.setText(", ".join(senders) if isinstance(senders, list) else str(senders))
         self.kw_edit.setText(", ".join(c.get("subject_keywords", [])))
         self.days_spin.setValue(c.get("check_days",30))
         exts = c.get("allow_exts", [".pdf"])
@@ -621,6 +635,7 @@ class MainWindow(QMainWindow):
             if QMessageBox.question(self,"提示","下载中,确定退出?") != QMessageBox.Yes:
                 e.ignore()
                 return
+        self._save_config(silent=True)
         if self.tray_check.isChecked():
             self.hide()
             e.ignore()
