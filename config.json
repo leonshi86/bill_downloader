@@ -1,0 +1,17 @@
+{
+    "email": "XX",
+    "auth_code": "XX",
+    "save_dir": "XX",
+    "senders": [
+        "XX"
+    ],
+    "subject_keywords": [
+        "XX",
+        "XX"
+    ],
+    "check_days": 30,
+    "allow_exts": [
+        ".pdf"
+    ],
+    "minimize_to_tray": true
+}
