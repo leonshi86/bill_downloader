@@ -39,6 +39,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
+    icon="icon.ico",
 )
 
 coll = COLLECT(
